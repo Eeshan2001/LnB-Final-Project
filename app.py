@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from datetime import date
 import numpy as np
 import pickle
 from streamlit_option_menu import option_menu
@@ -128,6 +129,45 @@ elif selected == "Heart Diasease Prediction":
 elif selected == "Car Price Prediction":
     st.title("Car Price Prediction")
     modelcar = pickle.load(open("models/car_price_model.pkl", "rb"))
+    Year = st.number_input("Year", min_value=2005, max_value=2020, step=1)
+    Present_Price = st.number_input(
+        "Present Price (lakhs)", min_value=5.5, max_value=95.6, step=0.2
+    )
+    Kms_Driven = st.number_input(
+        "Kilometers Driven", min_value=500, max_value=20000, step=100
+    )
+    Owner = st.number_input("No of Owner", min_value=0, max_value=4, step=1)
+    Fuel_Type_Petrol = st.selectbox("Fuel Type", ["Petrol", "Diesel", "CNG"])
+    Seller_Type_Individual = st.selectbox("Seller Type", ["Individual", "Dealer"])
+    Transmission_Manual = st.selectbox("Transmission Type", ["Manual", "Automatic Car"])
+    if Fuel_Type_Petrol == "Petrol":
+        Fuel_Type_Petrol = 1
+        Fuel_Type_Diesel = 0
+    else:
+        Fuel_Type_Petrol = 0
+        Fuel_Type_Diesel = 1
+    Year = date.today().year - Year
+
+    Seller_Type_Individual = 1 if Seller_Type_Individual == "Individual" else 0
+    Transmission_Manual = 1 if Transmission_Manual == "Manual" else 0
+    prediction = np.array(
+        [
+            [
+                Year,
+                Present_Price,
+                Kms_Driven,
+                Owner,
+                Fuel_Type_Diesel,
+                Fuel_Type_Petrol,
+                Seller_Type_Individual,
+                Transmission_Manual,
+            ]
+        ]
+    )
+    if st.button("Predict"):
+        prediction = np.round(modelcar.predict(prediction), 2)
+        st.success(f"Car can be sell for {prediction}")
+
 
 else:
     st.title("House Price Prediction")
